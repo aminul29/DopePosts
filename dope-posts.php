@@ -2,7 +2,7 @@
 /**
  * Plugin Name: Dope Posts
  * Description: Elementor widget for a masonry posts grid with search, filters, and AJAX load more.
- * Version: 1.1.1
+ * Version: 1.1.2
  * Author: Aminul Islam
  * Text Domain: dope-posts
  * Requires Plugins: elementor
@@ -14,7 +14,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-define( 'DOPE_POSTS_VERSION', '1.1.1' );
+define( 'DOPE_POSTS_VERSION', '1.1.2' );
 define( 'DOPE_POSTS_PATH', plugin_dir_path( __FILE__ ) );
 define( 'DOPE_POSTS_URL', plugin_dir_url( __FILE__ ) );
 

@@ -190,7 +190,7 @@ class Dope_Posts_Masonry_Widget extends Widget_Base {
 			Group_Control_Background::get_type(),
 			array(
 				'name'     => 'filter_input_background',
-				'selector' => '{{WRAPPER}} .dppw-search, {{WRAPPER}} .dppw-category, {{WRAPPER}} .dppw-tag, {{WRAPPER}} .dppw-order',
+				'selector' => '{{WRAPPER}} .dppw-search-wrap, {{WRAPPER}} .dppw-category, {{WRAPPER}} .dppw-tag, {{WRAPPER}} .dppw-order',
 			)
 		);
 
@@ -198,7 +198,7 @@ class Dope_Posts_Masonry_Widget extends Widget_Base {
 			Group_Control_Border::get_type(),
 			array(
 				'name'     => 'filter_input_border',
-				'selector' => '{{WRAPPER}} .dppw-search, {{WRAPPER}} .dppw-category, {{WRAPPER}} .dppw-tag, {{WRAPPER}} .dppw-order',
+				'selector' => '{{WRAPPER}} .dppw-search-wrap, {{WRAPPER}} .dppw-category, {{WRAPPER}} .dppw-tag, {{WRAPPER}} .dppw-order',
 			)
 		);
 
@@ -209,7 +209,7 @@ class Dope_Posts_Masonry_Widget extends Widget_Base {
 				'type'       => Controls_Manager::DIMENSIONS,
 				'size_units' => array( 'px', '%' ),
 				'selectors'  => array(
-					'{{WRAPPER}} .dppw-search, {{WRAPPER}} .dppw-category, {{WRAPPER}} .dppw-tag, {{WRAPPER}} .dppw-order' => 'border-radius: {{TOP}}{{UNIT}} {{RIGHT}}{{UNIT}} {{BOTTOM}}{{UNIT}} {{LEFT}}{{UNIT}};',
+					'{{WRAPPER}} .dppw-search-wrap, {{WRAPPER}} .dppw-category, {{WRAPPER}} .dppw-tag, {{WRAPPER}} .dppw-order' => 'border-radius: {{TOP}}{{UNIT}} {{RIGHT}}{{UNIT}} {{BOTTOM}}{{UNIT}} {{LEFT}}{{UNIT}};',
 				),
 			)
 		);
@@ -221,7 +221,7 @@ class Dope_Posts_Masonry_Widget extends Widget_Base {
 				'type'       => Controls_Manager::DIMENSIONS,
 				'size_units' => array( 'px', 'em', '%' ),
 				'selectors'  => array(
-					'{{WRAPPER}} .dppw-search, {{WRAPPER}} .dppw-category, {{WRAPPER}} .dppw-tag, {{WRAPPER}} .dppw-order' => 'padding: {{TOP}}{{UNIT}} {{RIGHT}}{{UNIT}} {{BOTTOM}}{{UNIT}} {{LEFT}}{{UNIT}};',
+					'{{WRAPPER}} .dppw-search-wrap, {{WRAPPER}} .dppw-category, {{WRAPPER}} .dppw-tag, {{WRAPPER}} .dppw-order' => 'padding: {{TOP}}{{UNIT}} {{RIGHT}}{{UNIT}} {{BOTTOM}}{{UNIT}} {{LEFT}}{{UNIT}};',
 				),
 			)
 		);
@@ -691,6 +691,7 @@ class Dope_Posts_Masonry_Widget extends Widget_Base {
 			<div class="dppw-filters">
 				<?php if ( 'yes' === $settings['show_search'] ) : ?>
 					<label class="dppw-search-wrap">
+						<span class="dppw-search-icon" aria-hidden="true"></span>
 						<input
 							type="search"
 							class="dppw-search"
