@@ -5,6 +5,10 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 use Elementor\Controls_Manager;
+use Elementor\Group_Control_Background;
+use Elementor\Group_Control_Border;
+use Elementor\Group_Control_Box_Shadow;
+use Elementor\Group_Control_Typography;
 use Elementor\Widget_Base;
 
 class Dope_Posts_Masonry_Widget extends Widget_Base {
@@ -112,6 +116,542 @@ class Dope_Posts_Masonry_Widget extends Widget_Base {
 				'return_value' => 'yes',
 			)
 		);
+
+		$this->end_controls_section();
+
+		$this->register_style_controls();
+	}
+
+	private function register_style_controls(): void {
+		$this->start_controls_section(
+			'section_style_filters',
+			array(
+				'label' => esc_html__( 'Filters Bar', 'dope-posts' ),
+				'tab'   => Controls_Manager::TAB_STYLE,
+			)
+		);
+
+		$this->add_responsive_control(
+			'filters_gap',
+			array(
+				'label'      => esc_html__( 'Controls Gap', 'dope-posts' ),
+				'type'       => Controls_Manager::SLIDER,
+				'size_units' => array( 'px' ),
+				'range'      => array(
+					'px' => array(
+						'min' => 0,
+						'max' => 40,
+					),
+				),
+				'selectors'  => array(
+					'{{WRAPPER}} .dppw-filters' => 'gap: {{SIZE}}{{UNIT}};',
+				),
+			)
+		);
+
+		$this->add_responsive_control(
+			'filters_margin_bottom',
+			array(
+				'label'      => esc_html__( 'Bottom Spacing', 'dope-posts' ),
+				'type'       => Controls_Manager::SLIDER,
+				'size_units' => array( 'px' ),
+				'range'      => array(
+					'px' => array(
+						'min' => 0,
+						'max' => 80,
+					),
+				),
+				'selectors'  => array(
+					'{{WRAPPER}} .dppw-filters' => 'margin-bottom: {{SIZE}}{{UNIT}};',
+				),
+			)
+		);
+
+		$this->add_group_control(
+			Group_Control_Typography::get_type(),
+			array(
+				'name'     => 'filter_input_typography',
+				'selector' => '{{WRAPPER}} .dppw-search, {{WRAPPER}} .dppw-category, {{WRAPPER}} .dppw-tag, {{WRAPPER}} .dppw-order',
+			)
+		);
+
+		$this->add_control(
+			'filter_input_text_color',
+			array(
+				'label'     => esc_html__( 'Text Color', 'dope-posts' ),
+				'type'      => Controls_Manager::COLOR,
+				'selectors' => array(
+					'{{WRAPPER}} .dppw-search, {{WRAPPER}} .dppw-category, {{WRAPPER}} .dppw-tag, {{WRAPPER}} .dppw-order' => 'color: {{VALUE}};',
+				),
+			)
+		);
+
+		$this->add_group_control(
+			Group_Control_Background::get_type(),
+			array(
+				'name'     => 'filter_input_background',
+				'selector' => '{{WRAPPER}} .dppw-search, {{WRAPPER}} .dppw-category, {{WRAPPER}} .dppw-tag, {{WRAPPER}} .dppw-order',
+			)
+		);
+
+		$this->add_group_control(
+			Group_Control_Border::get_type(),
+			array(
+				'name'     => 'filter_input_border',
+				'selector' => '{{WRAPPER}} .dppw-search, {{WRAPPER}} .dppw-category, {{WRAPPER}} .dppw-tag, {{WRAPPER}} .dppw-order',
+			)
+		);
+
+		$this->add_responsive_control(
+			'filter_input_border_radius',
+			array(
+				'label'      => esc_html__( 'Border Radius', 'dope-posts' ),
+				'type'       => Controls_Manager::DIMENSIONS,
+				'size_units' => array( 'px', '%' ),
+				'selectors'  => array(
+					'{{WRAPPER}} .dppw-search, {{WRAPPER}} .dppw-category, {{WRAPPER}} .dppw-tag, {{WRAPPER}} .dppw-order' => 'border-radius: {{TOP}}{{UNIT}} {{RIGHT}}{{UNIT}} {{BOTTOM}}{{UNIT}} {{LEFT}}{{UNIT}};',
+				),
+			)
+		);
+
+		$this->add_responsive_control(
+			'filter_input_padding',
+			array(
+				'label'      => esc_html__( 'Padding', 'dope-posts' ),
+				'type'       => Controls_Manager::DIMENSIONS,
+				'size_units' => array( 'px', 'em', '%' ),
+				'selectors'  => array(
+					'{{WRAPPER}} .dppw-search, {{WRAPPER}} .dppw-category, {{WRAPPER}} .dppw-tag, {{WRAPPER}} .dppw-order' => 'padding: {{TOP}}{{UNIT}} {{RIGHT}}{{UNIT}} {{BOTTOM}}{{UNIT}} {{LEFT}}{{UNIT}};',
+				),
+			)
+		);
+
+		$this->end_controls_section();
+
+		$this->start_controls_section(
+			'section_style_grid',
+			array(
+				'label' => esc_html__( 'Grid', 'dope-posts' ),
+				'tab'   => Controls_Manager::TAB_STYLE,
+			)
+		);
+
+		$this->add_responsive_control(
+			'grid_columns',
+			array(
+				'label'          => esc_html__( 'Columns', 'dope-posts' ),
+				'type'           => Controls_Manager::SELECT,
+				'default'        => '3',
+				'tablet_default' => '2',
+				'mobile_default' => '1',
+				'options'        => array(
+					'1' => '1',
+					'2' => '2',
+					'3' => '3',
+					'4' => '4',
+				),
+				'selectors'      => array(
+					'{{WRAPPER}} .dppw-grid' => 'column-count: {{VALUE}};',
+				),
+			)
+		);
+
+		$this->add_responsive_control(
+			'grid_gap',
+			array(
+				'label'      => esc_html__( 'Column Gap', 'dope-posts' ),
+				'type'       => Controls_Manager::SLIDER,
+				'size_units' => array( 'px' ),
+				'range'      => array(
+					'px' => array(
+						'min' => 0,
+						'max' => 50,
+					),
+				),
+				'selectors'  => array(
+					'{{WRAPPER}} .dppw-grid' => 'column-gap: {{SIZE}}{{UNIT}};',
+					'{{WRAPPER}} .dppw-card' => 'margin-bottom: {{SIZE}}{{UNIT}};',
+				),
+			)
+		);
+
+		$this->end_controls_section();
+
+		$this->start_controls_section(
+			'section_style_card',
+			array(
+				'label' => esc_html__( 'Card', 'dope-posts' ),
+				'tab'   => Controls_Manager::TAB_STYLE,
+			)
+		);
+
+		$this->add_group_control(
+			Group_Control_Background::get_type(),
+			array(
+				'name'     => 'card_background',
+				'selector' => '{{WRAPPER}} .dppw-card',
+			)
+		);
+
+		$this->add_group_control(
+			Group_Control_Border::get_type(),
+			array(
+				'name'     => 'card_border',
+				'selector' => '{{WRAPPER}} .dppw-card',
+			)
+		);
+
+		$this->add_responsive_control(
+			'card_border_radius',
+			array(
+				'label'      => esc_html__( 'Border Radius', 'dope-posts' ),
+				'type'       => Controls_Manager::DIMENSIONS,
+				'size_units' => array( 'px', '%' ),
+				'selectors'  => array(
+					'{{WRAPPER}} .dppw-card' => 'border-radius: {{TOP}}{{UNIT}} {{RIGHT}}{{UNIT}} {{BOTTOM}}{{UNIT}} {{LEFT}}{{UNIT}};',
+				),
+			)
+		);
+
+		$this->add_group_control(
+			Group_Control_Box_Shadow::get_type(),
+			array(
+				'name'     => 'card_shadow',
+				'selector' => '{{WRAPPER}} .dppw-card',
+			)
+		);
+
+		$this->add_responsive_control(
+			'card_content_padding',
+			array(
+				'label'      => esc_html__( 'Content Padding', 'dope-posts' ),
+				'type'       => Controls_Manager::DIMENSIONS,
+				'size_units' => array( 'px', '%', 'em' ),
+				'selectors'  => array(
+					'{{WRAPPER}} .dppw-card-body' => 'padding: {{TOP}}{{UNIT}} {{RIGHT}}{{UNIT}} {{BOTTOM}}{{UNIT}} {{LEFT}}{{UNIT}};',
+				),
+			)
+		);
+
+		$this->end_controls_section();
+
+		$this->start_controls_section(
+			'section_style_meta',
+			array(
+				'label' => esc_html__( 'Meta', 'dope-posts' ),
+				'tab'   => Controls_Manager::TAB_STYLE,
+			)
+		);
+
+		$this->add_group_control(
+			Group_Control_Typography::get_type(),
+			array(
+				'name'     => 'meta_typography',
+				'selector' => '{{WRAPPER}} .dppw-meta',
+			)
+		);
+
+		$this->add_control(
+			'meta_color',
+			array(
+				'label'     => esc_html__( 'Color', 'dope-posts' ),
+				'type'      => Controls_Manager::COLOR,
+				'selectors' => array(
+					'{{WRAPPER}} .dppw-meta' => 'color: {{VALUE}};',
+				),
+			)
+		);
+
+		$this->add_control(
+			'meta_category_color',
+			array(
+				'label'     => esc_html__( 'Category Color', 'dope-posts' ),
+				'type'      => Controls_Manager::COLOR,
+				'selectors' => array(
+					'{{WRAPPER}} .dppw-meta-category' => 'color: {{VALUE}};',
+				),
+			)
+		);
+
+		$this->end_controls_section();
+
+		$this->start_controls_section(
+			'section_style_title',
+			array(
+				'label' => esc_html__( 'Title', 'dope-posts' ),
+				'tab'   => Controls_Manager::TAB_STYLE,
+			)
+		);
+
+		$this->add_group_control(
+			Group_Control_Typography::get_type(),
+			array(
+				'name'     => 'title_typography',
+				'selector' => '{{WRAPPER}} .dppw-title, {{WRAPPER}} .dppw-title a',
+			)
+		);
+
+		$this->start_controls_tabs( 'tabs_title_colors' );
+
+		$this->start_controls_tab(
+			'tab_title_normal',
+			array(
+				'label' => esc_html__( 'Normal', 'dope-posts' ),
+			)
+		);
+
+		$this->add_control(
+			'title_color',
+			array(
+				'label'     => esc_html__( 'Color', 'dope-posts' ),
+				'type'      => Controls_Manager::COLOR,
+				'selectors' => array(
+					'{{WRAPPER}} .dppw-title a' => 'color: {{VALUE}};',
+				),
+			)
+		);
+
+		$this->end_controls_tab();
+
+		$this->start_controls_tab(
+			'tab_title_hover',
+			array(
+				'label' => esc_html__( 'Hover', 'dope-posts' ),
+			)
+		);
+
+		$this->add_control(
+			'title_hover_color',
+			array(
+				'label'     => esc_html__( 'Color', 'dope-posts' ),
+				'type'      => Controls_Manager::COLOR,
+				'selectors' => array(
+					'{{WRAPPER}} .dppw-title a:hover' => 'color: {{VALUE}};',
+				),
+			)
+		);
+
+		$this->end_controls_tab();
+
+		$this->end_controls_tabs();
+
+		$this->end_controls_section();
+
+		$this->start_controls_section(
+			'section_style_excerpt',
+			array(
+				'label' => esc_html__( 'Excerpt', 'dope-posts' ),
+				'tab'   => Controls_Manager::TAB_STYLE,
+			)
+		);
+
+		$this->add_group_control(
+			Group_Control_Typography::get_type(),
+			array(
+				'name'     => 'excerpt_typography',
+				'selector' => '{{WRAPPER}} .dppw-excerpt',
+			)
+		);
+
+		$this->add_control(
+			'excerpt_color',
+			array(
+				'label'     => esc_html__( 'Color', 'dope-posts' ),
+				'type'      => Controls_Manager::COLOR,
+				'selectors' => array(
+					'{{WRAPPER}} .dppw-excerpt' => 'color: {{VALUE}};',
+				),
+			)
+		);
+
+		$this->end_controls_section();
+
+		$this->start_controls_section(
+			'section_style_readmore',
+			array(
+				'label' => esc_html__( 'Read More', 'dope-posts' ),
+				'tab'   => Controls_Manager::TAB_STYLE,
+			)
+		);
+
+		$this->add_group_control(
+			Group_Control_Typography::get_type(),
+			array(
+				'name'     => 'readmore_typography',
+				'selector' => '{{WRAPPER}} .dppw-readmore',
+			)
+		);
+
+		$this->start_controls_tabs( 'tabs_readmore_colors' );
+
+		$this->start_controls_tab(
+			'tab_readmore_normal',
+			array(
+				'label' => esc_html__( 'Normal', 'dope-posts' ),
+			)
+		);
+
+		$this->add_control(
+			'readmore_color',
+			array(
+				'label'     => esc_html__( 'Color', 'dope-posts' ),
+				'type'      => Controls_Manager::COLOR,
+				'selectors' => array(
+					'{{WRAPPER}} .dppw-readmore' => 'color: {{VALUE}};',
+				),
+			)
+		);
+
+		$this->end_controls_tab();
+
+		$this->start_controls_tab(
+			'tab_readmore_hover',
+			array(
+				'label' => esc_html__( 'Hover', 'dope-posts' ),
+			)
+		);
+
+		$this->add_control(
+			'readmore_hover_color',
+			array(
+				'label'     => esc_html__( 'Color', 'dope-posts' ),
+				'type'      => Controls_Manager::COLOR,
+				'selectors' => array(
+					'{{WRAPPER}} .dppw-readmore:hover' => 'color: {{VALUE}};',
+				),
+			)
+		);
+
+		$this->end_controls_tab();
+
+		$this->end_controls_tabs();
+
+		$this->end_controls_section();
+
+		$this->start_controls_section(
+			'section_style_load_more',
+			array(
+				'label' => esc_html__( 'Load More Button', 'dope-posts' ),
+				'tab'   => Controls_Manager::TAB_STYLE,
+			)
+		);
+
+		$this->add_group_control(
+			Group_Control_Typography::get_type(),
+			array(
+				'name'     => 'load_more_typography',
+				'selector' => '{{WRAPPER}} .dppw-load-more',
+			)
+		);
+
+		$this->add_responsive_control(
+			'load_more_padding',
+			array(
+				'label'      => esc_html__( 'Padding', 'dope-posts' ),
+				'type'       => Controls_Manager::DIMENSIONS,
+				'size_units' => array( 'px', '%', 'em' ),
+				'selectors'  => array(
+					'{{WRAPPER}} .dppw-load-more' => 'padding: {{TOP}}{{UNIT}} {{RIGHT}}{{UNIT}} {{BOTTOM}}{{UNIT}} {{LEFT}}{{UNIT}};',
+				),
+			)
+		);
+
+		$this->add_group_control(
+			Group_Control_Border::get_type(),
+			array(
+				'name'     => 'load_more_border',
+				'selector' => '{{WRAPPER}} .dppw-load-more',
+			)
+		);
+
+		$this->add_responsive_control(
+			'load_more_border_radius',
+			array(
+				'label'      => esc_html__( 'Border Radius', 'dope-posts' ),
+				'type'       => Controls_Manager::DIMENSIONS,
+				'size_units' => array( 'px', '%' ),
+				'selectors'  => array(
+					'{{WRAPPER}} .dppw-load-more' => 'border-radius: {{TOP}}{{UNIT}} {{RIGHT}}{{UNIT}} {{BOTTOM}}{{UNIT}} {{LEFT}}{{UNIT}};',
+				),
+			)
+		);
+
+		$this->start_controls_tabs( 'tabs_load_more_colors' );
+
+		$this->start_controls_tab(
+			'tab_load_more_normal',
+			array(
+				'label' => esc_html__( 'Normal', 'dope-posts' ),
+			)
+		);
+
+		$this->add_control(
+			'load_more_text_color',
+			array(
+				'label'     => esc_html__( 'Text Color', 'dope-posts' ),
+				'type'      => Controls_Manager::COLOR,
+				'selectors' => array(
+					'{{WRAPPER}} .dppw-load-more' => 'color: {{VALUE}};',
+				),
+			)
+		);
+
+		$this->add_control(
+			'load_more_bg_color',
+			array(
+				'label'     => esc_html__( 'Background Color', 'dope-posts' ),
+				'type'      => Controls_Manager::COLOR,
+				'selectors' => array(
+					'{{WRAPPER}} .dppw-load-more' => 'background-color: {{VALUE}};',
+				),
+			)
+		);
+
+		$this->end_controls_tab();
+
+		$this->start_controls_tab(
+			'tab_load_more_hover',
+			array(
+				'label' => esc_html__( 'Hover', 'dope-posts' ),
+			)
+		);
+
+		$this->add_control(
+			'load_more_hover_text_color',
+			array(
+				'label'     => esc_html__( 'Text Color', 'dope-posts' ),
+				'type'      => Controls_Manager::COLOR,
+				'selectors' => array(
+					'{{WRAPPER}} .dppw-load-more:hover' => 'color: {{VALUE}};',
+				),
+			)
+		);
+
+		$this->add_control(
+			'load_more_hover_bg_color',
+			array(
+				'label'     => esc_html__( 'Background Color', 'dope-posts' ),
+				'type'      => Controls_Manager::COLOR,
+				'selectors' => array(
+					'{{WRAPPER}} .dppw-load-more:hover' => 'background-color: {{VALUE}};',
+				),
+			)
+		);
+
+		$this->add_control(
+			'load_more_hover_border_color',
+			array(
+				'label'     => esc_html__( 'Border Color', 'dope-posts' ),
+				'type'      => Controls_Manager::COLOR,
+				'selectors' => array(
+					'{{WRAPPER}} .dppw-load-more:hover' => 'border-color: {{VALUE}};',
+				),
+			)
+		);
+
+		$this->end_controls_tab();
+
+		$this->end_controls_tabs();
 
 		$this->end_controls_section();
 	}
