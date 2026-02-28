@@ -14,8 +14,24 @@
 }
 
 .dppw-search-wrap {
+	position: relative;
 	min-width: 220px;
 	flex: 1 1 260px;
+}
+
+.dppw-search-wrap::before {
+	content: "";
+	position: absolute;
+	left: 14px;
+	top: 50%;
+	width: 16px;
+	height: 16px;
+	transform: translateY( -50% );
+	pointer-events: none;
+	opacity: 0.7;
+	background-repeat: no-repeat;
+	background-size: 16px 16px;
+	background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='%236b7280' stroke-width='2'%3E%3Ccircle cx='11' cy='11' r='7'/%3E%3Cpath d='m20 20-3.5-3.5'/%3E%3C/svg%3E");
 }
 
 .dppw-search,
@@ -30,6 +46,10 @@
 	line-height: 1.4;
 	background: #fff;
 	color: var(--dppw-text);
+}
+
+.dppw-search {
+	padding-left: 38px;
 }
 
 .dppw-category,
