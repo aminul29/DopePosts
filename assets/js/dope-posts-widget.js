@@ -22,6 +22,23 @@
 		}
 	}
 
+	function appendFeaturedLoadMoreMarkup( $grid, html ) {
+		var $layout = $grid.find( '.dppw-featured-layout' ).first();
+		var $bottomList = $layout.find( '.dppw-featured-bottom-list' ).first();
+
+		if ( ! $layout.length ) {
+			$grid.append( html );
+			return;
+		}
+
+		if ( ! $bottomList.length ) {
+			$bottomList = $( '<div class="dppw-featured-bottom-list"></div>' );
+			$layout.append( $bottomList );
+		}
+
+		$bottomList.append( html );
+	}
+
 	function initWidget( $widget ) {
 		if ( ! $widget.length || $widget.data( 'dppwInitialized' ) ) {
 			return;
@@ -29,6 +46,7 @@
 		$widget.data( 'dppwInitialized', true );
 
 		var settings = parseSettings( $widget );
+		var layoutMode = settings.layout_mode || 'masonry';
 		var $grid = $widget.find( '.dppw-grid' ).first();
 		var $search = $widget.find( '.dppw-search' ).first();
 		var $category = $widget.find( '.dppw-category' ).first();
@@ -51,6 +69,7 @@
 				action: 'dope_posts_filter',
 				nonce: DopePostsWidget.nonce,
 				paged: targetPage,
+				is_load_more: reset ? 0 : 1,
 				search: $search.length ? $search.val() : '',
 				category: $category.length ? $category.val() : 0,
 				tag: $tag.length ? $tag.val() : 0,
@@ -66,7 +85,11 @@
 						$grid.html( response.data.html );
 						currentPage = 1;
 					} else {
-						$grid.append( response.data.html );
+						if ( 'featured_stack' === layoutMode ) {
+							appendFeaturedLoadMoreMarkup( $grid, response.data.html );
+						} else {
+							$grid.append( response.data.html );
+						}
 						currentPage = targetPage;
 					}
 

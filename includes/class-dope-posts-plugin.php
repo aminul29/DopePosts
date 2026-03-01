@@ -88,6 +88,7 @@ final class Dope_Posts_Plugin {
 		if ( ! is_array( $settings ) ) {
 			$settings = array();
 		}
+		$settings = Dope_Posts_Masonry_Widget::normalize_settings( $settings );
 
 		$request = array(
 			'search'   => isset( $_POST['search'] ) ? sanitize_text_field( wp_unslash( (string) $_POST['search'] ) ) : '',
@@ -95,11 +96,12 @@ final class Dope_Posts_Plugin {
 			'tag'      => isset( $_POST['tag'] ) ? absint( $_POST['tag'] ) : 0,
 			'order'    => isset( $_POST['order'] ) ? sanitize_key( wp_unslash( (string) $_POST['order'] ) ) : 'newest',
 		);
-		$paged   = isset( $_POST['paged'] ) ? max( 1, absint( $_POST['paged'] ) ) : 1;
+		$paged        = isset( $_POST['paged'] ) ? max( 1, absint( $_POST['paged'] ) ) : 1;
+		$is_load_more = isset( $_POST['is_load_more'] ) && 1 === absint( $_POST['is_load_more'] );
 
 		$args  = Dope_Posts_Masonry_Widget::build_query_args( $request, $paged, $settings );
 		$query = new WP_Query( $args );
-		$html  = Dope_Posts_Masonry_Widget::get_cards_markup( $query, $settings );
+		$html  = Dope_Posts_Masonry_Widget::render_posts_markup( $query, $settings, $is_load_more && $paged > 1 );
 
 		wp_send_json_success(
 			array(
@@ -155,4 +157,3 @@ final class Dope_Posts_Plugin {
 		);
 	}
 }
-

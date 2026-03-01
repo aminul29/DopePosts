@@ -82,6 +82,49 @@ class Dope_Posts_Masonry_Widget extends Widget_Base {
 		);
 
 		$this->add_control(
+			'layout_mode',
+			array(
+				'label'   => esc_html__( 'Layout Mode', 'dope-posts' ),
+				'type'    => Controls_Manager::SELECT,
+				'default' => 'masonry',
+				'options' => array(
+					'masonry'       => esc_html__( 'Masonry', 'dope-posts' ),
+					'featured_stack'=> esc_html__( 'Featured + Stacked', 'dope-posts' ),
+				),
+			)
+		);
+
+		$this->add_control(
+			'featured_show_author',
+			array(
+				'label'        => esc_html__( 'Show Author', 'dope-posts' ),
+				'type'         => Controls_Manager::SWITCHER,
+				'default'      => 'yes',
+				'label_on'     => esc_html__( 'Show', 'dope-posts' ),
+				'label_off'    => esc_html__( 'Hide', 'dope-posts' ),
+				'return_value' => 'yes',
+				'condition'    => array(
+					'layout_mode' => 'featured_stack',
+				),
+			)
+		);
+
+		$this->add_control(
+			'featured_show_date',
+			array(
+				'label'        => esc_html__( 'Show Date', 'dope-posts' ),
+				'type'         => Controls_Manager::SWITCHER,
+				'default'      => 'yes',
+				'label_on'     => esc_html__( 'Show', 'dope-posts' ),
+				'label_off'    => esc_html__( 'Hide', 'dope-posts' ),
+				'return_value' => 'yes',
+				'condition'    => array(
+					'layout_mode' => 'featured_stack',
+				),
+			)
+		);
+
+		$this->add_control(
 			'show_search',
 			array(
 				'label'        => esc_html__( 'Show Search', 'dope-posts' ),
@@ -657,9 +700,10 @@ class Dope_Posts_Masonry_Widget extends Widget_Base {
 	}
 
 	protected function render(): void {
-		$settings = $this->sanitize_widget_settings( $this->get_settings_for_display() );
-		$widget_id = 'dppw-' . $this->get_id();
-		$request   = array(
+		$settings     = self::normalize_settings( $this->get_settings_for_display() );
+		$widget_id    = 'dppw-' . $this->get_id();
+		$layout_class = 'dppw-layout--' . $settings['layout_mode'];
+		$request      = array(
 			'search'   => '',
 			'category' => 0,
 			'tag'      => 0,
@@ -684,7 +728,7 @@ class Dope_Posts_Masonry_Widget extends Widget_Base {
 
 		?>
 		<div
-			class="dppw-widget"
+			class="<?php echo esc_attr( 'dppw-widget ' . $layout_class ); ?>"
 			id="<?php echo esc_attr( $widget_id ); ?>"
 			data-settings="<?php echo esc_attr( wp_json_encode( $settings ) ); ?>"
 		>
@@ -740,7 +784,7 @@ class Dope_Posts_Masonry_Widget extends Widget_Base {
 			</div>
 
 			<div class="dppw-grid" data-page="1">
-				<?php echo self::get_cards_markup( $query, $settings ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
+				<?php echo self::render_posts_markup( $query, $settings ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
 			</div>
 
 			<div class="dppw-actions">
@@ -756,11 +800,14 @@ class Dope_Posts_Masonry_Widget extends Widget_Base {
 		<?php
 	}
 
-	private function sanitize_widget_settings( array $settings ): array {
+	public static function normalize_settings( array $settings ): array {
 		$defaults = array(
 			'posts_per_page'      => 6,
 			'excerpt_words'       => 20,
 			'default_order'       => 'newest',
+			'layout_mode'         => 'masonry',
+			'featured_show_author'=> 'yes',
+			'featured_show_date'  => 'yes',
 			'show_search'         => 'yes',
 			'show_category_filter'=> 'yes',
 			'show_tag_filter'     => 'yes',
@@ -775,6 +822,16 @@ class Dope_Posts_Masonry_Widget extends Widget_Base {
 			$settings['default_order'] = 'newest';
 		}
 
+		$layout_modes = array(
+			'masonry',
+			'featured_stack',
+		);
+		if ( ! in_array( $settings['layout_mode'], $layout_modes, true ) ) {
+			$settings['layout_mode'] = 'masonry';
+		}
+
+		$settings['featured_show_author'] = ( 'yes' === $settings['featured_show_author'] ) ? 'yes' : '';
+		$settings['featured_show_date']   = ( 'yes' === $settings['featured_show_date'] ) ? 'yes' : '';
 		$settings['show_search']          = ( 'yes' === $settings['show_search'] ) ? 'yes' : '';
 		$settings['show_category_filter'] = ( 'yes' === $settings['show_category_filter'] ) ? 'yes' : '';
 		$settings['show_tag_filter']      = ( 'yes' === $settings['show_tag_filter'] ) ? 'yes' : '';
@@ -866,7 +923,23 @@ class Dope_Posts_Masonry_Widget extends Widget_Base {
 		return $args;
 	}
 
+	public static function render_posts_markup( WP_Query $query, array $settings, bool $is_load_more = false ): string {
+		$settings = self::normalize_settings( $settings );
+
+		if ( 'featured_stack' === $settings['layout_mode'] ) {
+			return $is_load_more
+				? self::get_featured_stack_append_markup( $query, $settings )
+				: self::get_featured_stack_markup( $query, $settings );
+		}
+
+		return self::get_masonry_cards_markup( $query, $settings );
+	}
+
 	public static function get_cards_markup( WP_Query $query, array $settings ): string {
+		return self::render_posts_markup( $query, $settings, false );
+	}
+
+	private static function get_masonry_cards_markup( WP_Query $query, array $settings ): string {
 		ob_start();
 
 		if ( ! $query->have_posts() ) {
@@ -915,5 +988,195 @@ class Dope_Posts_Masonry_Widget extends Widget_Base {
 		wp_reset_postdata();
 
 		return (string) ob_get_clean();
+	}
+
+	private static function get_featured_stack_markup( WP_Query $query, array $settings ): string {
+		ob_start();
+
+		if ( ! $query->have_posts() ) {
+			echo '<p class="dppw-empty">' . esc_html__( 'No publications found.', 'dope-posts' ) . '</p>';
+			return (string) ob_get_clean();
+		}
+
+		$hero_markup    = '';
+		$compact_markups = array();
+		$post_index     = 0;
+
+		while ( $query->have_posts() ) {
+			$query->the_post();
+			$post_id   = get_the_ID();
+			$post_data = self::get_featured_post_data( $post_id, $settings );
+
+			if ( 0 === $post_index ) {
+				$hero_markup = self::get_featured_hero_markup( $post_data, $settings );
+			} else {
+				$compact_markups[] = self::get_featured_compact_markup( $post_data, $settings );
+			}
+
+			++$post_index;
+		}
+
+		wp_reset_postdata();
+
+		$side_markups   = array_slice( $compact_markups, 0, 3 );
+		$bottom_markups = array_slice( $compact_markups, 3 );
+		?>
+		<div class="dppw-featured-layout">
+			<div class="dppw-featured-top">
+				<?php echo $hero_markup; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
+				<?php if ( ! empty( $side_markups ) ) : ?>
+					<div class="dppw-featured-side">
+						<?php
+						foreach ( $side_markups as $card_markup ) {
+							echo $card_markup; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
+						}
+						?>
+					</div>
+				<?php endif; ?>
+			</div>
+
+			<?php if ( ! empty( $bottom_markups ) ) : ?>
+				<div class="dppw-featured-bottom-list">
+					<?php
+					foreach ( $bottom_markups as $card_markup ) {
+						echo $card_markup; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
+					}
+					?>
+				</div>
+			<?php endif; ?>
+		</div>
+		<?php
+
+		return (string) ob_get_clean();
+	}
+
+	private static function get_featured_stack_append_markup( WP_Query $query, array $settings ): string {
+		ob_start();
+
+		while ( $query->have_posts() ) {
+			$query->the_post();
+			$post_id   = get_the_ID();
+			$post_data = self::get_featured_post_data( $post_id, $settings );
+			echo self::get_featured_compact_markup( $post_data, $settings ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
+		}
+
+		wp_reset_postdata();
+
+		return (string) ob_get_clean();
+	}
+
+	private static function get_featured_post_data( int $post_id, array $settings ): array {
+		$categories = get_the_category( $post_id );
+		$category   = ! empty( $categories[0]->name ) ? $categories[0]->name : esc_html__( 'Uncategorized', 'dope-posts' );
+		$author_id  = (int) get_post_field( 'post_author', $post_id );
+		$author     = ( $author_id > 0 ) ? get_the_author_meta( 'display_name', $author_id ) : '';
+
+		$excerpt_words = isset( $settings['excerpt_words'] ) ? max( 0, absint( $settings['excerpt_words'] ) ) : 20;
+		$raw_excerpt   = (string) get_the_excerpt( $post_id );
+		$excerpt       = wp_trim_words( wp_strip_all_tags( $raw_excerpt ), $excerpt_words, '...' );
+
+		return array(
+			'post_id'   => $post_id,
+			'title'     => get_the_title( $post_id ),
+			'permalink' => (string) get_permalink( $post_id ),
+			'category'  => $category,
+			'date'      => get_the_date( '', $post_id ),
+			'date_iso'  => get_the_date( 'c', $post_id ),
+			'author'    => $author,
+			'excerpt'   => $excerpt,
+			'is_video'  => has_post_format( 'video', $post_id ),
+		);
+	}
+
+	private static function get_featured_hero_markup( array $post_data, array $settings ): string {
+		ob_start();
+		?>
+		<article class="dppw-card dppw-featured-hero-card">
+			<div class="dppw-featured-hero-media">
+				<a class="dppw-thumb-link" href="<?php echo esc_url( $post_data['permalink'] ); ?>" aria-label="<?php echo esc_attr( $post_data['title'] ); ?>">
+					<?php echo self::get_featured_thumbnail_markup( (int) $post_data['post_id'], 'large', 'dppw-thumb dppw-featured-hero-thumb' ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
+				</a>
+				<?php echo self::get_featured_play_icon_markup( (bool) $post_data['is_video'], 'dppw-play-icon dppw-play-icon--hero' ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
+				<div class="dppw-featured-hero-overlay" aria-hidden="true"></div>
+			</div>
+			<div class="dppw-card-body dppw-featured-hero-content">
+				<span class="dppw-meta-category dppw-featured-category-badge"><?php echo esc_html( $post_data['category'] ); ?></span>
+				<h3 class="dppw-title dppw-featured-hero-title">
+					<a href="<?php echo esc_url( $post_data['permalink'] ); ?>"><?php echo esc_html( $post_data['title'] ); ?></a>
+				</h3>
+				<?php if ( isset( $settings['excerpt_words'] ) && absint( $settings['excerpt_words'] ) > 0 && '' !== $post_data['excerpt'] ) : ?>
+					<p class="dppw-excerpt dppw-featured-excerpt"><?php echo esc_html( $post_data['excerpt'] ); ?></p>
+				<?php endif; ?>
+				<?php echo self::get_featured_meta_markup( $post_data, $settings ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
+			</div>
+		</article>
+		<?php
+
+		return (string) ob_get_clean();
+	}
+
+	private static function get_featured_compact_markup( array $post_data, array $settings ): string {
+		ob_start();
+		?>
+		<article class="dppw-card dppw-featured-compact-card">
+			<a class="dppw-thumb-link dppw-featured-compact-media" href="<?php echo esc_url( $post_data['permalink'] ); ?>" aria-label="<?php echo esc_attr( $post_data['title'] ); ?>">
+				<?php echo self::get_featured_thumbnail_markup( (int) $post_data['post_id'], 'medium_large', 'dppw-thumb dppw-featured-compact-thumb' ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
+				<?php echo self::get_featured_play_icon_markup( (bool) $post_data['is_video'], 'dppw-play-icon dppw-play-icon--compact' ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
+			</a>
+			<div class="dppw-card-body dppw-featured-compact-body">
+				<span class="dppw-meta-category dppw-featured-category-label"><?php echo esc_html( $post_data['category'] ); ?></span>
+				<h3 class="dppw-title dppw-featured-compact-title">
+					<a href="<?php echo esc_url( $post_data['permalink'] ); ?>"><?php echo esc_html( $post_data['title'] ); ?></a>
+				</h3>
+				<?php if ( isset( $settings['excerpt_words'] ) && absint( $settings['excerpt_words'] ) > 0 && '' !== $post_data['excerpt'] ) : ?>
+					<p class="dppw-excerpt dppw-featured-excerpt"><?php echo esc_html( $post_data['excerpt'] ); ?></p>
+				<?php endif; ?>
+				<?php echo self::get_featured_meta_markup( $post_data, $settings ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
+			</div>
+		</article>
+		<?php
+
+		return (string) ob_get_clean();
+	}
+
+	private static function get_featured_meta_markup( array $post_data, array $settings ): string {
+		$parts = array();
+
+		if ( 'yes' === $settings['featured_show_author'] && '' !== $post_data['author'] ) {
+			$parts[] = '<span class="dppw-featured-author">' . esc_html( $post_data['author'] ) . '</span>';
+		}
+
+		if ( 'yes' === $settings['featured_show_date'] && '' !== $post_data['date'] ) {
+			$parts[] = '<time datetime="' . esc_attr( $post_data['date_iso'] ) . '">' . esc_html( $post_data['date'] ) . '</time>';
+		}
+
+		if ( empty( $parts ) ) {
+			return '';
+		}
+
+		return '<div class="dppw-meta dppw-featured-meta-line">' . implode( '<span class="dppw-sep">&bull;</span>', $parts ) . '</div>';
+	}
+
+	private static function get_featured_thumbnail_markup( int $post_id, string $size, string $class_name ): string {
+		if ( has_post_thumbnail( $post_id ) ) {
+			return (string) get_the_post_thumbnail(
+				$post_id,
+				$size,
+				array(
+					'class'   => $class_name,
+					'loading' => 'lazy',
+				)
+			);
+		}
+
+		return '<div class="' . esc_attr( $class_name . ' dppw-thumb-placeholder' ) . '"></div>';
+	}
+
+	private static function get_featured_play_icon_markup( bool $is_video, string $class_name ): string {
+		if ( ! $is_video ) {
+			return '';
+		}
+
+		return '<span class="' . esc_attr( $class_name ) . '" aria-hidden="true"></span>';
 	}
 }
